@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <data>
+        <variable
+            name="viewModel"
+            type="com.yolocc.gank.viewModel.ItemGankViewModel"/>
+    </data>
+
+    <android.support.v7.widget.CardView
+        android:layout_height="100dp"
+        android:layout_marginBottom="@dimen/vertical_margin_half"
+        android:layout_marginLeft="@dimen/vertical_margin"
+        android:layout_marginRight="@dimen/vertical_margin"
+        android:layout_marginTop="@dimen/vertical_margin_half"
+        android:layout_width="match_parent">
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_height="25dp"
+                android:gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:text="@{viewModel.date}"
+                tools:text="2016-12-19"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:background="@color/colorAccent"
+                android:layout_height="1dp"/>
+
+
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+
+</layout>
