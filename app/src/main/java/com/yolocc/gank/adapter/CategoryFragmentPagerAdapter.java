@@ -11,7 +11,7 @@ import com.yolocc.gank.view.CategoryFragment;
 
 public class CategoryFragmentPagerAdapter extends FragmentPagerAdapter {
 
-    private String[] category = new String[]{"福利","Android","iOS","休息视频","拓展资源","前端"};
+    private String[] category = new String[]{"福利","Android","iOS","休息视频","拓展资源","前端","瞎推荐"};
 
     public CategoryFragmentPagerAdapter(FragmentManager fm) {
         super(fm);

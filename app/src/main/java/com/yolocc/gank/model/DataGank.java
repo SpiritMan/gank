@@ -23,6 +23,6 @@ public class DataGank {
     }
 
     public void setGankInfos(List<GankInfo> gankInfos) {
-        mGankInfos = gankInfos;
+        this.mGankInfos = gankInfos;
     }
 }
