@@ -1,6 +1,7 @@
 package com.yolocc.gank.adapter;
 
 import android.databinding.DataBindingUtil;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -83,6 +84,9 @@ public class GankDataAdapter extends RecyclerView.Adapter{
             } else {
                 mBinding.getViewModel().setDataGank(dataGank);
             }
+            GankTitleAdapter adapter = new GankTitleAdapter(dataGank.getGankInfos());
+            mBinding.dateGankRecyclerView.setAdapter(adapter);
+            mBinding.dateGankRecyclerView.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
         }
     }
 
