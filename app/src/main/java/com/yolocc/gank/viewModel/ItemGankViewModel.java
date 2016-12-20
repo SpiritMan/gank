@@ -2,9 +2,10 @@ package com.yolocc.gank.viewModel;
 
 import android.databinding.BaseObservable;
 import android.databinding.BindingAdapter;
+import android.util.Log;
 import android.widget.ImageView;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 import com.yolocc.gank.R;
 import com.yolocc.gank.model.DataGank;
 
@@ -12,6 +13,8 @@ import com.yolocc.gank.model.DataGank;
  */
 
 public class ItemGankViewModel extends BaseObservable{
+
+    private static final String TAG = "ItemGankViewModel";
 
     public DataGank mDataGank;
 
@@ -34,9 +37,11 @@ public class ItemGankViewModel extends BaseObservable{
 
     @BindingAdapter({"imageUrl"})
     public static void loadImage(ImageView view, String imageUrl) {
-        Picasso.with(view.getContext())
+        Log.i(TAG,imageUrl+"?imageView2/0/w/540");
+        Glide.with(view.getContext())
                 .load(imageUrl)
-                .placeholder(R.mipmap.ic_launcher)
+                .fitCenter()
+                .error(R.mipmap.ic_launcher)
                 .into(view);
     }
 }
