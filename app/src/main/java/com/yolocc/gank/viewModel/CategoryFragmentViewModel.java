@@ -3,6 +3,7 @@ package com.yolocc.gank.viewModel;
 import android.content.Context;
 import android.databinding.ObservableInt;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 import com.yolocc.gank.Constants;
@@ -16,7 +17,6 @@ import com.yolocc.gank.utils.DateUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -28,50 +28,86 @@ import rx.schedulers.Schedulers;
 
 public class CategoryFragmentViewModel implements ViewModel {
 
+    private static final String TAG = "CategoryFragmentViewModel";
+
     public String mCategory;
     private Context mContext;
     private Subscription mSubscription;
     private int page = 1;
+    private DataListener mDataListener;
     public ObservableInt recyclerViewVisibility;
 
-    public CategoryFragmentViewModel(String category, Context context) {
+    public CategoryFragmentViewModel(String category, Context context, DataListener dataListener) {
         mCategory = category;
         mContext = context;
+        this.mDataListener = dataListener;
         recyclerViewVisibility = new ObservableInt(View.VISIBLE);
         getCategoryData();
     }
 
-    public void getCategoryData() {
+    private void getCategoryData() {
         unSubscribe(mSubscription);
         mSubscription = GankService.defaultInstance().create(GankApi.class)
                 .getCategoryGankData(mCategory, Constants.COUNT, page)
                 .subscribeOn(Schedulers.io())
-                .flatMap(new Func1<GankWrap, Observable<List<DataGank>>>() {
+                .map(new Func1<GankWrap, List<DataGank>>() {
                     @Override
-                    public Observable<List<DataGank>> call(GankWrap gankWrap) {
+                    public List<DataGank> call(GankWrap gankWrap) {
+                        List<DataGank> mDataGanks = new ArrayList<>();
                         if (gankWrap.results.size() > 0) {
                             String dateStr = null;
-                            List<DataGank> mDataGanks = new ArrayList<>();
                             List<GankInfo> mGankInfo = new ArrayList<>();
-                            for (GankInfo gankInfo : gankWrap.results) {
-                                String publicDate = DateUtil.toDate(gankInfo.getPublishedAt());
-                                if(TextUtils.equals(dateStr,publicDate)) {
-                                    mGankInfo.add(gankInfo);
+                            List<GankInfo> mResultGanks = gankWrap.results;
+                            for (int i = 0; i < mResultGanks.size(); i++) {
+                                String publicDate = DateUtil.toDate(mResultGanks.get(i).getPublishedAt());
+                                String nextPublicDate;
+                                if (i < (mResultGanks.size() - 1)) {
+                                    nextPublicDate = DateUtil.toDate(mResultGanks.get(i + 1).getPublishedAt());
                                 } else {
-                                    if(!TextUtils.isEmpty(dateStr)) {
-                                        DataGank dataGank = new DataGank();
-                                        dataGank.setDate(publicDate);
-                                        dataGank.setGankInfos(mGankInfo);
-                                        mGankInfo.clear();
-                                        mDataGanks.add(dataGank);
-                                    }
-                                    dateStr = publicDate;
-
+                                    nextPublicDate = DateUtil.toDate(mResultGanks.get(i - 1).getPublishedAt());
                                 }
+                                dateStr = publicDate;
+                                mGankInfo.add(mResultGanks.get(i));
+                                if (!TextUtils.equals(publicDate, nextPublicDate)) {
+                                    DataGank dataGank = new DataGank();
+                                    dataGank.setDate(dateStr);
+                                    List<GankInfo> temp = new ArrayList<>();
+                                    temp.addAll(mGankInfo);
+                                    dataGank.setGankInfos(temp);
+                                    mGankInfo.clear();
+                                    mDataGanks.add(dataGank);
+                                }
+                            }
+//                            for (GankInfo gankInfo : gankWrap.results) {
+//                                String publicDate = DateUtil.toDate(gankInfo.getPublishedAt());
+//                                if (TextUtils.equals(dateStr, publicDate)) {
+//                                    mGankInfo.add(gankInfo);
+//                                } else {
+//                                    if (!TextUtils.isEmpty(dateStr)) {
+//                                        DataGank dataGank = new DataGank();
+//                                        dataGank.setDate(dateStr);
+//                                        List<GankInfo> temp = new ArrayList<>();
+//                                        temp.addAll(mGankInfo);
+//                                        dataGank.setGankInfos(temp);
+//                                        mGankInfo.clear();
+//                                        mDataGanks.add(dataGank);
+//                                    }
+//                                    dateStr = publicDate;
+//
+//                                }
+//                            }
+                            if (mGankInfo.size() > 0) {
+                                DataGank dataGank = new DataGank();
+                                dataGank.setDate(dateStr);
+                                List<GankInfo> temp = new ArrayList<>();
+                                temp.addAll(mGankInfo);
+                                dataGank.setGankInfos(temp);
+                                mGankInfo.clear();
+                                mDataGanks.add(dataGank);
                             }
                             return mDataGanks;
                         } else {
-                            return null;
+                            return mDataGanks;
                         }
                     }
                 })
@@ -84,15 +120,20 @@ public class CategoryFragmentViewModel implements ViewModel {
 
                     @Override
                     public void onError(Throwable e) {
-                        System.out.println("error++++++++++++");
-                        System.out.println(e.toString());
+                        Log.e(TAG, e.toString());
                     }
 
                     @Override
                     public void onNext(List<DataGank> dataGanks) {
-                        for (DataGank dataGank : dataGanks) {
-                            System.out.println("date:"+dataGank.getDate());
+                        boolean isRefresh = false;
+                        if (page == 1) {
+                            isRefresh = true;
                         }
+                        for (DataGank dataGank : dataGanks) {
+                            System.out.println(dataGank.getDate());
+                            System.out.println(dataGank.getGankInfos().get(0).getUrl());
+                        }
+                        mDataListener.onGankDataChanged(dataGanks, isRefresh);
                     }
                 });
     }
@@ -108,5 +149,9 @@ public class CategoryFragmentViewModel implements ViewModel {
         if (subscription != null && !subscription.isUnsubscribed()) {
             subscription.unsubscribe();
         }
+    }
+
+    public interface DataListener {
+        void onGankDataChanged(List<DataGank> dataGanks, boolean isRefresh);
     }
 }

@@ -13,15 +13,19 @@ import android.view.ViewGroup;
 import com.yolocc.gank.R;
 import com.yolocc.gank.adapter.GankDataAdapter;
 import com.yolocc.gank.databinding.FragmentCategoryBinding;
+import com.yolocc.gank.model.DataGank;
 import com.yolocc.gank.viewModel.CategoryFragmentViewModel;
+
+import java.util.List;
 
 /**
  */
 
-public class CategoryFragment extends Fragment{
+public class CategoryFragment extends Fragment implements CategoryFragmentViewModel.DataListener{
 
     public static final String CATEGORY_NAME = "categoryName";
 
+    private FragmentCategoryBinding fragmentCategoryBinding;
     public static CategoryFragment newInstance(String categoryName) {
         Bundle args = new Bundle();
         args.putString(CATEGORY_NAME,categoryName);
@@ -38,20 +42,29 @@ public class CategoryFragment extends Fragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        FragmentCategoryBinding fragmentCategoryBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_category,container,false);
-        CategoryFragmentViewModel categoryFragmentViewModel = new CategoryFragmentViewModel(getArguments().getString(CATEGORY_NAME),getActivity());
+        fragmentCategoryBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_category,container,false);
+        CategoryFragmentViewModel categoryFragmentViewModel = new CategoryFragmentViewModel(getArguments().getString(CATEGORY_NAME),getActivity(),this);
         fragmentCategoryBinding.setViewModel(categoryFragmentViewModel);
-        initRecyclerView(fragmentCategoryBinding.gankRecyclerView);
+        initRecyclerView(fragmentCategoryBinding.gankRecyclerView,categoryFragmentViewModel.mCategory);
         return fragmentCategoryBinding.getRoot();
     }
 
     /**
      * 初始化RecyclerView
      */
-    private void initRecyclerView(RecyclerView recyclerView) {
-        GankDataAdapter gankDataAdapter = new GankDataAdapter();
+    private void initRecyclerView(RecyclerView recyclerView,String category) {
+        GankDataAdapter gankDataAdapter = new GankDataAdapter(category);
         recyclerView.setAdapter(gankDataAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
+    @Override
+    public void onGankDataChanged(List<DataGank> dataGanks, boolean isRefresh) {
+        GankDataAdapter gankDataAdapter = (GankDataAdapter) fragmentCategoryBinding.gankRecyclerView.getAdapter();
+        if(isRefresh) {
+            gankDataAdapter.refreshData(dataGanks);
+        } else {
+            gankDataAdapter.addData(dataGanks);
+        }
+    }
 }
