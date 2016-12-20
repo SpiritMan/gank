@@ -16,7 +16,7 @@ public class ItemGankViewModel extends BaseObservable{
 
     private static final String TAG = "ItemGankViewModel";
 
-    public DataGank mDataGank;
+    private DataGank mDataGank;
 
     public ItemGankViewModel(DataGank dataGank) {
         mDataGank = dataGank;
