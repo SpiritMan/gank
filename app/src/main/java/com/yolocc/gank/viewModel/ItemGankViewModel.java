@@ -1,9 +1,9 @@
 package com.yolocc.gank.viewModel;
 
 import android.content.Context;
+import android.content.Intent;
 import android.databinding.BaseObservable;
 import android.databinding.BindingAdapter;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.yolocc.gank.R;
 import com.yolocc.gank.model.DataGank;
+import com.yolocc.gank.view.PictureActivity;
 
 /**
  */
@@ -42,9 +43,10 @@ public class ItemGankViewModel extends BaseObservable{
     }
 
     public void onItemClick(View view) {
-//        Intent intent = new Intent(mContext,);
-//        mContext.startActivity(intent);
-        Snackbar.make(view,"jump",Snackbar.LENGTH_SHORT).show();
+        Intent intent = new Intent(mContext, PictureActivity.class);
+        intent.putExtra(PictureActivity.DESC,mDataGank.getGankInfos().get(0).getDesc());
+        intent.putExtra(PictureActivity.IMAGE_URL,mDataGank.getGankInfos().get(0).getUrl());
+        mContext.startActivity(intent);
     }
 
     @BindingAdapter({"imageUrl"})
