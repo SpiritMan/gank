@@ -8,32 +8,17 @@
             type="com.yolocc.gank.viewModel.ItemGankTitleViewModel"/>
     </data>
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/title"
+        android:textColor="@color/title_color"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="@{viewModel.onItemClick}"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
         android:background="?attr/selectableItemBackground"
-        android:orientation="horizontal">
+        android:onClick="@{viewModel.onItemClick}"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:textSize="14sp"
+        android:lineSpacingExtra="2dp"
+        android:text="@{viewModel.title}"
+        tools:text="demo"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="·"
-            android:textSize="20sp"/>
-
-        <Space
-            android:layout_width="6dp"
-            android:layout_height="wrap_content"/>
-
-        <TextView
-            android:id="@+id/title"
-            android:textColor="@color/title_color"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:text="@{viewModel.title}"
-            tools:text="demo"/>
-    </LinearLayout>
 </layout>

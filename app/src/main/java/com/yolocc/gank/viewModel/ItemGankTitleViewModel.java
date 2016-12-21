@@ -2,13 +2,10 @@ package com.yolocc.gank.viewModel;
 
 import android.content.Context;
 import android.databinding.BaseObservable;
-import android.text.SpannableStringBuilder;
 import android.view.View;
 import android.widget.Toast;
 
-import com.yolocc.gank.R;
 import com.yolocc.gank.model.GankInfo;
-import com.yolocc.gank.utils.StringStyles;
 
 /**
  */
@@ -27,12 +24,13 @@ public class ItemGankTitleViewModel extends BaseObservable{
     }
 
     public String getTitle() {
-        SpannableStringBuilder builder = new SpannableStringBuilder(mGankInfo.getDesc()).append(
-                StringStyles.format(mContext, " (by." +
-                        mGankInfo.getWho()+
-                        ")", R.style.ViaTextAppearance));
-        CharSequence gankText = builder.subSequence(0, builder.length());
-        return gankText.toString();
+//        SpannableStringBuilder builder = new SpannableStringBuilder(mGankInfo.getDesc()).append(
+//                StringStyles.format(mContext, " (by." +
+//                        mGankInfo.getWho()+
+//                        ")", R.style.ViaTextAppearance));
+//        CharSequence gankText = builder.subSequence(0, builder.length());
+        StringBuffer stringBuffer = new StringBuffer("· ").append(mGankInfo.getDesc()).append(" (by.").append(mGankInfo.getWho()).append(")");
+        return stringBuffer.toString();
     }
 
     public void onItemClick(View view) {

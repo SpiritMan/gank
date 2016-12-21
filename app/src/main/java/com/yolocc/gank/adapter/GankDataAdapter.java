@@ -21,7 +21,7 @@ import static android.databinding.DataBindingUtil.inflate;
 /**
  */
 
-public class GankDataAdapter extends RecyclerView.Adapter{
+public class GankDataAdapter extends RecyclerView.Adapter {
 
     private List<DataGank> mDataGanks;
     private String category;
@@ -31,7 +31,7 @@ public class GankDataAdapter extends RecyclerView.Adapter{
         this.category = category;
     }
 
-    public void addData(List<DataGank> addData){
+    public void addData(List<DataGank> addData) {
         this.mDataGanks.addAll(addData);
         //TODO 优化更新测量
         notifyDataSetChanged();
@@ -45,8 +45,8 @@ public class GankDataAdapter extends RecyclerView.Adapter{
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if(TextUtils.equals(category,"福利")) {
-            ItemMeiziBinding mBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()),R.layout.item_meizi,parent,false);
+        if (TextUtils.equals(category, "福利")) {
+            ItemMeiziBinding mBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.item_meizi, parent, false);
             return new MeiZiViewHolder(mBinding);
         } else {
             ItemGankDataBinding mBinding = inflate(LayoutInflater.from(parent.getContext()), R.layout.item_gank_data, parent, false);
@@ -56,10 +56,10 @@ public class GankDataAdapter extends RecyclerView.Adapter{
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if(holder instanceof GankDataViewHolder) {
+        if (holder instanceof GankDataViewHolder) {
             GankDataViewHolder gankDataViewHolder = (GankDataViewHolder) holder;
             gankDataViewHolder.bindGankData(mDataGanks.get(position));
-        } else if(holder instanceof MeiZiViewHolder) {
+        } else if (holder instanceof MeiZiViewHolder) {
             MeiZiViewHolder meiZiViewHolder = (MeiZiViewHolder) holder;
             meiZiViewHolder.bindMeiZi(mDataGanks.get(position));
         }
@@ -79,8 +79,8 @@ public class GankDataAdapter extends RecyclerView.Adapter{
         }
 
         void bindGankData(DataGank dataGank) {
-            if(mBinding.getViewModel() == null) {
-                mBinding.setViewModel(new ItemGankViewModel(dataGank));
+            if (mBinding.getViewModel() == null) {
+                mBinding.setViewModel(new ItemGankViewModel(dataGank, itemView.getContext()));
             } else {
                 mBinding.getViewModel().setDataGank(dataGank);
             }
@@ -100,8 +100,8 @@ public class GankDataAdapter extends RecyclerView.Adapter{
         }
 
         void bindMeiZi(DataGank dataGank) {
-            if(mBinding.getViewModel() == null) {
-                mBinding.setViewModel(new ItemGankViewModel(dataGank));
+            if (mBinding.getViewModel() == null) {
+                mBinding.setViewModel(new ItemGankViewModel(dataGank, itemView.getContext()));
             } else {
                 mBinding.getViewModel().setDataGank(dataGank);
             }
