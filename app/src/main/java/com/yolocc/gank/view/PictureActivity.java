@@ -6,10 +6,13 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.yolocc.gank.R;
 import com.yolocc.gank.databinding.ActivityPictureBinding;
 import com.yolocc.gank.viewModel.PictureViewModel;
+
+import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class PictureActivity extends AppCompatActivity {
 
@@ -17,6 +20,7 @@ public class PictureActivity extends AppCompatActivity {
     public static final String IMAGE_URL = "image_url";
 
     private ActivityPictureBinding mActivityPictureBinding;
+    private PhotoViewAttacher mAttacher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +32,7 @@ public class PictureActivity extends AppCompatActivity {
         pictureViewModel.mImageUrl = imageUrl;
         mActivityPictureBinding.setViewModel(pictureViewModel);
         initToolbar(mActivityPictureBinding.toolbar, desc);
+        initPhoto(pictureViewModel);
     }
 
     private void initToolbar(Toolbar toolbar, String desc) {
@@ -39,6 +44,17 @@ public class PictureActivity extends AppCompatActivity {
         }
     }
 
+    private void initPhoto(final PictureViewModel pictureViewModel) {
+        mAttacher = new PhotoViewAttacher(mActivityPictureBinding.pictureIv);
+        mAttacher.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
+            @Override
+            public void onViewTap(View view, float x, float y) {
+                pictureViewModel.onImageClick(view);
+            }
+        });
+    }
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -47,5 +63,11 @@ public class PictureActivity extends AppCompatActivity {
         } else {
             return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mAttacher.cleanup();
     }
 }

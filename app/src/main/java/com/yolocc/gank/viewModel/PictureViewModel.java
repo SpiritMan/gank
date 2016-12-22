@@ -1,6 +1,8 @@
 package com.yolocc.gank.viewModel;
 
 import android.databinding.BindingAdapter;
+import android.databinding.ObservableInt;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -13,11 +15,24 @@ public class PictureViewModel {
 
     public String mImageUrl;
 
-    @BindingAdapter({"imageUrl"})
+    public ObservableInt mToolbarVisibility;
+
+    public PictureViewModel() {
+        mToolbarVisibility = new ObservableInt(View.VISIBLE);
+    }
+
+    public void onImageClick(View view) {
+        if (mToolbarVisibility.get() == View.VISIBLE) {
+            mToolbarVisibility.set(View.GONE);
+        } else {
+            mToolbarVisibility.set(View.VISIBLE);
+        }
+    }
+
+    @BindingAdapter({"pictureImageUrl"})
     public static void loadImage(ImageView view, String imageUrl) {
         Glide.with(view.getContext())
                 .load(imageUrl)
-                .fitCenter()
                 .error(R.mipmap.ic_launcher)
                 .into(view);
     }
