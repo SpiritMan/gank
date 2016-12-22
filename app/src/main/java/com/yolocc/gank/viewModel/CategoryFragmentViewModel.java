@@ -78,24 +78,6 @@ public class CategoryFragmentViewModel implements ViewModel {
                                     mDataGanks.add(dataGank);
                                 }
                             }
-//                            for (GankInfo gankInfo : gankWrap.results) {
-//                                String publicDate = DateUtil.toDate(gankInfo.getPublishedAt());
-//                                if (TextUtils.equals(dateStr, publicDate)) {
-//                                    mGankInfo.add(gankInfo);
-//                                } else {
-//                                    if (!TextUtils.isEmpty(dateStr)) {
-//                                        DataGank dataGank = new DataGank();
-//                                        dataGank.setDate(dateStr);
-//                                        List<GankInfo> temp = new ArrayList<>();
-//                                        temp.addAll(mGankInfo);
-//                                        dataGank.setGankInfos(temp);
-//                                        mGankInfo.clear();
-//                                        mDataGanks.add(dataGank);
-//                                    }
-//                                    dateStr = publicDate;
-//
-//                                }
-//                            }
                             if (mGankInfo.size() > 0) {
                                 DataGank dataGank = new DataGank();
                                 dataGank.setDate(dateStr);

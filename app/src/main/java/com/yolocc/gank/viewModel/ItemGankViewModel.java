@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.BaseObservable;
 import android.databinding.BindingAdapter;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -51,7 +50,6 @@ public class ItemGankViewModel extends BaseObservable{
 
     @BindingAdapter({"imageUrl"})
     public static void loadImage(ImageView view, String imageUrl) {
-        Log.i(TAG,imageUrl+"?imageView2/0/w/540");
         Glide.with(view.getContext())
                 .load(imageUrl)
                 .fitCenter()
