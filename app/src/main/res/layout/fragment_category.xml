@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
     >
 
     <data>
@@ -11,13 +11,18 @@
             type="com.yolocc.gank.viewModel.CategoryFragmentViewModel"/>
     </data>
 
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/gank_recycler_view"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/refresh_srl"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#e1e1e1"
-        app:visibility="@{viewModel.recyclerViewVisibility}"
-        tools:listitem="@layout/item_gank_data"></android.support.v7.widget.RecyclerView>
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/gank_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#e1e1e1"
+            app:visibility="@{viewModel.recyclerViewVisibility}"
+            tools:listitem="@layout/item_gank_data"></android.support.v7.widget.RecyclerView>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </layout>

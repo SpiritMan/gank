@@ -19,7 +19,7 @@
         android:layout_marginRight="@dimen/vertical_margin"
         android:layout_marginTop="@dimen/vertical_margin_half">
 
-        <ImageView
+        <com.yolocc.gank.weight.RatioImageView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scaleType="centerCrop"

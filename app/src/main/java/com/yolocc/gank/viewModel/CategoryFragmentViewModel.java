@@ -1,6 +1,5 @@
 package com.yolocc.gank.viewModel;
 
-import android.content.Context;
 import android.databinding.ObservableInt;
 import android.text.TextUtils;
 import android.util.Log;
@@ -31,21 +30,18 @@ public class CategoryFragmentViewModel implements ViewModel {
     private static final String TAG = "CategoryFragmentViewModel";
 
     public String mCategory;
-    private Context mContext;
     private Subscription mSubscription;
-    private int page = 1;
     private DataListener mDataListener;
     public ObservableInt recyclerViewVisibility;
 
-    public CategoryFragmentViewModel(String category, Context context, DataListener dataListener) {
+    public CategoryFragmentViewModel(String category, DataListener dataListener) {
         mCategory = category;
-        mContext = context;
         this.mDataListener = dataListener;
         recyclerViewVisibility = new ObservableInt(View.VISIBLE);
-        getCategoryData();
+        getCategoryData(1);
     }
 
-    private void getCategoryData() {
+    public void getCategoryData(final int page) {
         unSubscribe(mSubscription);
         mSubscription = GankService.defaultInstance().create(GankApi.class)
                 .getCategoryGankData(mCategory, Constants.COUNT, page)
@@ -103,6 +99,9 @@ public class CategoryFragmentViewModel implements ViewModel {
                     @Override
                     public void onError(Throwable e) {
                         Log.e(TAG, e.toString());
+                        if (mDataListener != null) {
+                            mDataListener.onGankDateError();
+                        }
                     }
 
                     @Override
@@ -124,7 +123,6 @@ public class CategoryFragmentViewModel implements ViewModel {
     public void destroy() {
         unSubscribe(mSubscription);
         mSubscription = null;
-        mContext = null;
     }
 
     private void unSubscribe(Subscription subscription) {
@@ -135,5 +133,7 @@ public class CategoryFragmentViewModel implements ViewModel {
 
     public interface DataListener {
         void onGankDataChanged(List<DataGank> dataGanks, boolean isRefresh);
+
+        void onGankDateError();
     }
 }
