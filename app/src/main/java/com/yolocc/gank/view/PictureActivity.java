@@ -1,7 +1,11 @@
 package com.yolocc.gank.view;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -20,6 +24,7 @@ public class PictureActivity extends AppCompatActivity {
 
     public static final String DESC = "desc";
     public static final String IMAGE_URL = "image_url";
+    private static final int STORAGE_PERMISSION_REQUEST = 0x1;
 
     private ActivityPictureBinding mActivityPictureBinding;
     private PhotoViewAttacher mAttacher;
@@ -65,7 +70,12 @@ public class PictureActivity extends AppCompatActivity {
                 finish();
                 return true;
             case R.id.action_save:
-                mActivityPictureBinding.getViewModel().downloadImage();
+                //android 6.0后手动申请权限
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && PackageManager.PERMISSION_DENIED == checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST);
+                } else {
+                    mActivityPictureBinding.getViewModel().downloadImage();
+                }
                 return true;
             case R.id.action_share:
                 Toast.makeText(this, "share", Toast.LENGTH_SHORT).show();
@@ -74,6 +84,13 @@ public class PictureActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED && requestCode == STORAGE_PERMISSION_REQUEST) {
+            mActivityPictureBinding.getViewModel().downloadImage();
+        }
     }
 
     @Override
