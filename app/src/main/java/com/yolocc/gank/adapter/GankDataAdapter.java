@@ -32,9 +32,14 @@ public class GankDataAdapter extends RecyclerView.Adapter {
     }
 
     public void addData(List<DataGank> addData) {
+        DataGank dataGank = mDataGanks.get(mDataGanks.size() - 1);
+        //消除分页导致同一天的信息显示在不同item中
+        if (dataGank.getDate().equals(addData.get(0).getDate())) {
+            dataGank.getGankInfos().addAll(addData.get(0).getGankInfos());
+            addData.remove(0);
+        }
         this.mDataGanks.addAll(addData);
-        //TODO 优化更新测量
-        notifyDataSetChanged();
+        notifyItemRangeChanged(mDataGanks.size() - 1, addData.size());
     }
 
     public void refreshData(List<DataGank> newData) {
