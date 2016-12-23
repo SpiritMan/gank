@@ -5,8 +5,10 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.yolocc.gank.R;
 import com.yolocc.gank.databinding.ActivityPictureBinding;
@@ -28,8 +30,9 @@ public class PictureActivity extends AppCompatActivity {
         mActivityPictureBinding = DataBindingUtil.setContentView(this, R.layout.activity_picture);
         String desc = getIntent().getStringExtra(DESC);
         String imageUrl = getIntent().getStringExtra(IMAGE_URL);
-        PictureViewModel pictureViewModel = new PictureViewModel();
+        PictureViewModel pictureViewModel = new PictureViewModel(this);
         pictureViewModel.mImageUrl = imageUrl;
+        pictureViewModel.desc = desc;
         mActivityPictureBinding.setViewModel(pictureViewModel);
         initToolbar(mActivityPictureBinding.toolbar, desc);
         initPhoto(pictureViewModel);
@@ -57,17 +60,32 @@ public class PictureActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        } else {
-            return super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+            case R.id.action_save:
+                mActivityPictureBinding.getViewModel().downloadImage();
+                return true;
+            case R.id.action_share:
+                Toast.makeText(this, "share", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_picture, menu);
+        return true;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mActivityPictureBinding.getViewModel().destroy();
         mAttacher.cleanup();
     }
 }
