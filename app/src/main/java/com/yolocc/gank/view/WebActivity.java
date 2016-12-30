@@ -15,8 +15,13 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
+import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.sdk.openapi.SendMessageToWX;
+import com.tencent.mm.sdk.openapi.WXAPIFactory;
+import com.tencent.mm.sdk.openapi.WXMediaMessage;
+import com.tencent.mm.sdk.openapi.WXWebpageObject;
+import com.yolocc.gank.Constants;
 import com.yolocc.gank.R;
 import com.yolocc.gank.databinding.ActivityWebBinding;
 
@@ -24,16 +29,22 @@ public class WebActivity extends AppCompatActivity {
 
     public static final String URL = "url";
     public static final String DESC = "desc";
+    public static final String IMAGE = "image";
 
     private ActivityWebBinding activityWebBinding;
+    private String desc, url;
+    private IWXAPI iwxapi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activityWebBinding = DataBindingUtil.setContentView(this, R.layout.activity_web);
         initToolbar(activityWebBinding.toolbar);
-        activityWebBinding.title.setText(getIntent().getStringExtra(DESC));
-        initWebView(activityWebBinding.webView, getIntent().getStringExtra(URL));
+        desc = getIntent().getStringExtra(DESC);
+        url = getIntent().getStringExtra(URL);
+        activityWebBinding.title.setText(desc);
+        iwxapi = WXAPIFactory.createWXAPI(this, Constants.APP_ID, true);
+        initWebView(activityWebBinding.webView, url);
     }
 
     private void initToolbar(Toolbar toolbar) {
@@ -103,7 +114,51 @@ public class WebActivity extends AppCompatActivity {
     }
 
     public void share(View view) {
-        Toast.makeText(this, "share", Toast.LENGTH_SHORT).show();
+        final ShareBottomDialogFragment shareBottomDialogFragment = new ShareBottomDialogFragment();
+        shareBottomDialogFragment.show(getFragmentManager(), "shareFragment");
+        shareBottomDialogFragment.setOnShareClickListener(new ShareBottomDialogFragment.OnShareClickListener() {
+            @Override
+            public void onTargetChose(int target) {
+                switch (target) {
+                    case ShareBottomDialogFragment.WECHAT_FRIEND_TARGET:
+                        shareWechat(desc, url, 1);
+                        break;
+                    case ShareBottomDialogFragment.WECHAT_MOMENT_TARGET:
+                        shareWechat(desc, url, 2);
+                        break;
+                }
+            }
+        });
+    }
+
+    /**
+     * 分享图片到微信
+     *
+     * @param desc   网页描述
+     * @param webUrl 网页链接
+     * @param type   1表示分享给微信朋友，2表示分享到微信朋友圈
+     */
+    private void shareWechat(String desc, String webUrl, int type) {
+        WXWebpageObject webpageObject = new WXWebpageObject();
+        webpageObject.webpageUrl = webUrl;
+        WXMediaMessage mediaMessage = new WXMediaMessage();
+        if (type == 1) {
+            mediaMessage.title = "干货分享";
+            mediaMessage.description = desc;
+        } else {
+            mediaMessage.title = desc;
+        }
+        mediaMessage.mediaObject = webpageObject;
+        SendMessageToWX.Req req = new SendMessageToWX.Req();
+        req.transaction = buildTransaction("webpage");
+        req.message = mediaMessage;
+        req.scene = type == 1 ? SendMessageToWX.Req.WXSceneSession : SendMessageToWX.Req.WXSceneTimeline;
+        iwxapi.sendReq(req);
+
+    }
+
+    private String buildTransaction(final String type) {
+        return (type == null) ? String.valueOf(System.currentTimeMillis()) : type + System.currentTimeMillis();
     }
 
     private class GankClick extends WebViewClient {

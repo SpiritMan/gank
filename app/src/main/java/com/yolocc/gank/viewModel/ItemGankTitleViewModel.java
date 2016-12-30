@@ -38,6 +38,9 @@ public class ItemGankTitleViewModel extends BaseObservable {
         Intent intent = new Intent(mContext, WebActivity.class);
         intent.putExtra(WebActivity.URL, mGankInfo.getUrl());
         intent.putExtra(WebActivity.DESC, mGankInfo.getDesc());
+        if (mGankInfo.getImages() != null && mGankInfo.getImages().size() > 0) {
+            intent.putExtra(WebActivity.IMAGE, mGankInfo.getImages().get(0));
+        }
         mContext.startActivity(intent);
     }
 
