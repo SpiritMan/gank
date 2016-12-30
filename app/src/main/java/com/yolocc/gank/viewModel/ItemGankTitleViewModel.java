@@ -1,16 +1,17 @@
 package com.yolocc.gank.viewModel;
 
 import android.content.Context;
+import android.content.Intent;
 import android.databinding.BaseObservable;
 import android.view.View;
-import android.widget.Toast;
 
 import com.yolocc.gank.model.GankInfo;
+import com.yolocc.gank.view.WebActivity;
 
 /**
  */
 
-public class ItemGankTitleViewModel extends BaseObservable{
+public class ItemGankTitleViewModel extends BaseObservable {
 
     private static final String TAG = "ItemGankTitleViewModel";
 
@@ -34,9 +35,10 @@ public class ItemGankTitleViewModel extends BaseObservable{
     }
 
     public void onItemClick(View view) {
-//        Intent intent = new Intent(mContext,);
-//        mContext.startActivity(intent);
-        Toast.makeText(mContext, mGankInfo.getDesc(), Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(mContext, WebActivity.class);
+        intent.putExtra(WebActivity.URL, mGankInfo.getUrl());
+        intent.putExtra(WebActivity.DESC, mGankInfo.getDesc());
+        mContext.startActivity(intent);
     }
 
 

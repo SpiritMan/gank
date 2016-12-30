@@ -106,7 +106,7 @@ public class CategoryFragment extends Fragment implements CategoryFragmentViewMo
         isLoadingData = false;
         fragmentCategoryBinding.refreshSrl.setRefreshing(false);
         if (page == 1) {
-
+            // TODO: 16/12/29 show empty view 
         }
     }
 

@@ -33,7 +33,26 @@
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             android:visibility="@{viewModel.mToolbarVisibility}"
             app:layout_scrollFlags="scroll|enterAlways"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"></android.support.v7.widget.Toolbar>
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:background="@drawable/btn_default_bg"
+                android:onClick="share"
+                android:padding="12dp"
+                android:src="@mipmap/share"/>
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:background="@drawable/btn_default_bg"
+                android:onClick="save"
+                android:padding="12dp"
+                android:src="@mipmap/save"/>
+        </android.support.v7.widget.Toolbar>
 
 
     </RelativeLayout>
