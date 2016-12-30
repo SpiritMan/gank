@@ -9,7 +9,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -27,7 +26,7 @@ public class PictureActivity extends AppCompatActivity {
     private static final int STORAGE_PERMISSION_REQUEST = 0x1;
 
     private ActivityPictureBinding mActivityPictureBinding;
-    private PhotoViewAttacher mAttacher;
+    private PhotoViewAttacher attacher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,15 +45,14 @@ public class PictureActivity extends AppCompatActivity {
     private void initToolbar(Toolbar toolbar, String desc) {
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
+        assert actionBar != null;
         actionBar.setTitle(desc);
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
     private void initPhoto(final PictureViewModel pictureViewModel) {
-        mAttacher = new PhotoViewAttacher(mActivityPictureBinding.pictureIv);
-        mAttacher.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
+        attacher = new PhotoViewAttacher(mActivityPictureBinding.pictureIv);
+        attacher.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
             @Override
             public void onViewTap(View view, float x, float y) {
                 pictureViewModel.onImageClick(view);
@@ -69,21 +67,23 @@ public class PictureActivity extends AppCompatActivity {
             case android.R.id.home:
                 finish();
                 return true;
-            case R.id.action_save:
-                //android 6.0后手动申请权限
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && PackageManager.PERMISSION_DENIED == checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST);
-                } else {
-                    mActivityPictureBinding.getViewModel().downloadImage();
-                }
-                return true;
-            case R.id.action_share:
-                Toast.makeText(this, "share", Toast.LENGTH_SHORT).show();
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
 
+    }
+
+    public void save(View view) {
+        //android 6.0后手动申请权限
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && PackageManager.PERMISSION_DENIED == checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST);
+        } else {
+            mActivityPictureBinding.getViewModel().downloadImage();
+        }
+    }
+
+    public void share(View view) {
+        Toast.makeText(this, "share", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -93,16 +93,11 @@ public class PictureActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_picture, menu);
-        return true;
-    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mActivityPictureBinding.getViewModel().destroy();
-        mAttacher.cleanup();
+        attacher.cleanup();
     }
 }
