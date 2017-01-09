@@ -1,6 +1,7 @@
 package com.yolocc.gank.view;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
@@ -16,11 +17,15 @@ import android.view.View;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.tencent.connect.share.QQShare;
 import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.SendMessageToWX;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
 import com.tencent.mm.sdk.openapi.WXImageObject;
 import com.tencent.mm.sdk.openapi.WXMediaMessage;
+import com.tencent.tauth.IUiListener;
+import com.tencent.tauth.Tencent;
+import com.tencent.tauth.UiError;
 import com.yolocc.gank.Constants;
 import com.yolocc.gank.R;
 import com.yolocc.gank.databinding.ActivityPictureBinding;
@@ -30,7 +35,7 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 
 import static com.yolocc.gank.view.ShareBottomDialogFragment.OnShareClickListener;
 
-public class PictureActivity extends AppCompatActivity {
+public class PictureActivity extends AppCompatActivity implements PictureViewModel.DataListener {
 
     public static final String DESC = "desc";
     public static final String IMAGE_URL = "image_url";
@@ -39,6 +44,8 @@ public class PictureActivity extends AppCompatActivity {
     private ActivityPictureBinding mActivityPictureBinding;
     private PhotoViewAttacher attacher;
     private IWXAPI iwxapi;
+    private Tencent mTencent;
+    private int mExtarFlag = 0x00;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,13 +53,14 @@ public class PictureActivity extends AppCompatActivity {
         mActivityPictureBinding = DataBindingUtil.setContentView(this, R.layout.activity_picture);
         String desc = getIntent().getStringExtra(DESC);
         String imageUrl = getIntent().getStringExtra(IMAGE_URL);
-        PictureViewModel pictureViewModel = new PictureViewModel(this);
+        PictureViewModel pictureViewModel = new PictureViewModel(this, this);
         pictureViewModel.mImageUrl = imageUrl;
         pictureViewModel.desc = desc;
         mActivityPictureBinding.setViewModel(pictureViewModel);
         initToolbar(mActivityPictureBinding.toolbar, desc);
         initPhoto(pictureViewModel);
-        iwxapi = WXAPIFactory.createWXAPI(this, Constants.APP_ID, true);
+        iwxapi = WXAPIFactory.createWXAPI(this, Constants.WECHAT_APP_ID, true);
+        mTencent = Tencent.createInstance(Constants.QQ_APP_ID, this.getApplicationContext());
     }
 
     private void initToolbar(Toolbar toolbar, String desc) {
@@ -68,7 +76,7 @@ public class PictureActivity extends AppCompatActivity {
         attacher.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
             @Override
             public void onViewTap(View view, float x, float y) {
-                pictureViewModel.onImageClick(view);
+                pictureViewModel.onImageClick();
             }
         });
     }
@@ -87,6 +95,7 @@ public class PictureActivity extends AppCompatActivity {
     }
 
     public void save(View view) {
+        mActivityPictureBinding.getViewModel().isShare = false;
         //android 6.0后手动申请权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && PackageManager.PERMISSION_DENIED == checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
             requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST);
@@ -107,6 +116,26 @@ public class PictureActivity extends AppCompatActivity {
                         break;
                     case ShareBottomDialogFragment.WECHAT_MOMENT_TARGET:
                         shareWechat(mActivityPictureBinding.getViewModel().mImageUrl, 2);
+                        break;
+                    case ShareBottomDialogFragment.QQ_FRIEND_TARGET:
+                        mActivityPictureBinding.getViewModel().isShare = true;
+                        mActivityPictureBinding.getViewModel().type = 1;
+                        //android 6.0后手动申请权限
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && PackageManager.PERMISSION_DENIED == checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST);
+                        } else {
+                            mActivityPictureBinding.getViewModel().downloadImage();
+                        }
+                        break;
+                    case ShareBottomDialogFragment.QQ_ZONE_TARGET:
+                        mActivityPictureBinding.getViewModel().isShare = true;
+                        mActivityPictureBinding.getViewModel().type = 2;
+                        //android 6.0后手动申请权限
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && PackageManager.PERMISSION_DENIED == checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST);
+                        } else {
+                            mActivityPictureBinding.getViewModel().downloadImage();
+                        }
                         break;
                 }
             }
@@ -139,10 +168,39 @@ public class PictureActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * 分享图片给qq
+     *
+     * @param type     1代表分享给朋友，2代表分享到QQ空间
+     * @param imageUrl 图片本地路劲
+     */
+    public void sharePictureQq(int type, String imageUrl) {
+        final Bundle params = new Bundle();
+        int shareType = QQShare.SHARE_TO_QQ_TYPE_IMAGE;
+        if (type == 1) {
+            mExtarFlag &= (0xFFFFFFFF - QQShare.SHARE_TO_QQ_FLAG_QZONE_AUTO_OPEN);
+        } else {
+            mExtarFlag |= QQShare.SHARE_TO_QQ_FLAG_QZONE_AUTO_OPEN;
+        }
+        params.putString(QQShare.SHARE_TO_QQ_IMAGE_LOCAL_URL, imageUrl);
+        params.putString(QQShare.SHARE_TO_QQ_APP_NAME, "Gank");
+        params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, shareType);
+        params.putInt(QQShare.SHARE_TO_QQ_EXT_INT, mExtarFlag);
+
+        mTencent.shareToQQ(this, params, iUiListener);
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED && requestCode == STORAGE_PERMISSION_REQUEST) {
             mActivityPictureBinding.getViewModel().downloadImage();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == com.tencent.connect.common.Constants.REQUEST_QQ_SHARE) {
+            Tencent.onActivityResultData(requestCode, resultCode, data, iUiListener);
         }
     }
 
@@ -156,4 +214,26 @@ public class PictureActivity extends AppCompatActivity {
         mActivityPictureBinding.getViewModel().destroy();
         attacher.cleanup();
     }
+
+    @Override
+    public void savePictureSuccess(String path, int type) {
+        sharePictureQq(type, path);
+    }
+
+    IUiListener iUiListener = new IUiListener() {
+        @Override
+        public void onComplete(Object o) {
+
+        }
+
+        @Override
+        public void onError(UiError uiError) {
+
+        }
+
+        @Override
+        public void onCancel() {
+
+        }
+    };
 }

@@ -15,8 +15,8 @@ public class MainViewModel implements ViewModel {
 
     public MainViewModel(Context context) {
         mContext = context;
-        IWXAPI iwxapi = WXAPIFactory.createWXAPI(mContext, Constants.APP_ID,true);
-        iwxapi.registerApp(Constants.APP_ID);
+        IWXAPI iwxapi = WXAPIFactory.createWXAPI(mContext, Constants.WECHAT_APP_ID,true);
+        iwxapi.registerApp(Constants.WECHAT_APP_ID);
     }
 
     @Override

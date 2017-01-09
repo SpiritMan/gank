@@ -1,5 +1,6 @@
 package com.yolocc.gank.view;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,11 +17,15 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.tencent.connect.share.QQShare;
 import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.SendMessageToWX;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
 import com.tencent.mm.sdk.openapi.WXMediaMessage;
 import com.tencent.mm.sdk.openapi.WXWebpageObject;
+import com.tencent.tauth.IUiListener;
+import com.tencent.tauth.Tencent;
+import com.tencent.tauth.UiError;
 import com.yolocc.gank.Constants;
 import com.yolocc.gank.R;
 import com.yolocc.gank.databinding.ActivityWebBinding;
@@ -34,6 +39,7 @@ public class WebActivity extends AppCompatActivity {
     private ActivityWebBinding activityWebBinding;
     private String desc, url;
     private IWXAPI iwxapi;
+    private Tencent mTencent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +49,9 @@ public class WebActivity extends AppCompatActivity {
         desc = getIntent().getStringExtra(DESC);
         url = getIntent().getStringExtra(URL);
         activityWebBinding.title.setText(desc);
-        iwxapi = WXAPIFactory.createWXAPI(this, Constants.APP_ID, true);
+        iwxapi = WXAPIFactory.createWXAPI(this, Constants.WECHAT_APP_ID, true);
         initWebView(activityWebBinding.webView, url);
+        mTencent = Tencent.createInstance(Constants.QQ_APP_ID, this);
     }
 
     private void initToolbar(Toolbar toolbar) {
@@ -126,9 +133,43 @@ public class WebActivity extends AppCompatActivity {
                     case ShareBottomDialogFragment.WECHAT_MOMENT_TARGET:
                         shareWechat(desc, url, 2);
                         break;
+                    case ShareBottomDialogFragment.QQ_FRIEND_TARGET:
+                        shareQq(desc, url, 1);
+                        break;
+                    case ShareBottomDialogFragment.QQ_ZONE_TARGET:
+                        shareQq(desc, url, 2);
+                        break;
                 }
             }
         });
+    }
+
+    /**
+     * 分享图片到微信
+     *
+     * @param desc   网页描述
+     * @param webUrl 网页链接
+     * @param type   1表示分享给QQ朋友，2表示分享到QQ空间
+     */
+    private void shareQq(String desc, String webUrl, int type) {
+        Bundle bundle = new Bundle();
+        int mExtarFlag = 0x00;
+        if (type == 1) {
+            mExtarFlag &= (0xFFFFFFFF - QQShare.SHARE_TO_QQ_FLAG_QZONE_AUTO_OPEN);
+        } else {
+            mExtarFlag |= QQShare.SHARE_TO_QQ_FLAG_QZONE_AUTO_OPEN;
+        }
+        //这条分享消息被好友点击后的跳转URL。
+        bundle.putString(QQShare.SHARE_TO_QQ_TARGET_URL, webUrl);
+        //分享的标题。注：PARAM_TITLE、PARAM_IMAGE_URL、PARAM_SUMMARY不能全为空，最少必须有一个是有值的。
+        bundle.putString(QQShare.SHARE_TO_QQ_TITLE, "干货分享");
+//        //分享的消息摘要，最长50个字
+        bundle.putString(QQShare.SHARE_TO_QQ_SUMMARY, desc);
+        //手Q客户端顶部，替换“返回”按钮文字，如果为空，用返回代替
+        bundle.putString(QQShare.SHARE_TO_QQ_APP_NAME, "Gank");
+        bundle.putInt(QQShare.SHARE_TO_QQ_EXT_INT, mExtarFlag);
+
+        mTencent.shareToQQ(this, bundle, iUiListener);
     }
 
     /**
@@ -156,6 +197,30 @@ public class WebActivity extends AppCompatActivity {
         iwxapi.sendReq(req);
 
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == com.tencent.connect.common.Constants.REQUEST_QQ_SHARE) {
+            Tencent.onActivityResultData(requestCode, resultCode, data, iUiListener);
+        }
+    }
+
+    IUiListener iUiListener = new IUiListener() {
+        @Override
+        public void onComplete(Object o) {
+
+        }
+
+        @Override
+        public void onError(UiError uiError) {
+
+        }
+
+        @Override
+        public void onCancel() {
+
+        }
+    };
 
     private String buildTransaction(final String type) {
         return (type == null) ? String.valueOf(System.currentTimeMillis()) : type + System.currentTimeMillis();

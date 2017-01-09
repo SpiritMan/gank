@@ -37,18 +37,25 @@ public class PictureViewModel implements ViewModel {
 
     public String desc;
 
+    public int type;
+
+    public boolean isShare;
+
     public ObservableInt mToolbarVisibility;
 
     private Subscription mSubscription;
 
     private Context mContext;
 
-    public PictureViewModel(Context context) {
+    private DataListener mDataListener;
+
+    public PictureViewModel(Context context, DataListener dataListener) {
         mToolbarVisibility = new ObservableInt(View.VISIBLE);
         this.mContext = context;
+        this.mDataListener = dataListener;
     }
 
-    public void onImageClick(View view) {
+    public void onImageClick() {
         if (mToolbarVisibility.get() == View.VISIBLE) {
             mToolbarVisibility.set(View.GONE);
         } else {
@@ -103,7 +110,12 @@ public class PictureViewModel implements ViewModel {
                         mContext.sendBroadcast(scannerIntent);
                         File appDir = new File(Environment.getExternalStorageDirectory(), "GankImage");
                         String msg = "图片以保存到" + appDir.getAbsolutePath();
-                        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+                        System.out.println("path:"+uri.getPath());
+                        if(isShare) {
+                            mDataListener.savePictureSuccess(uri.getPath(),type);
+                        } else {
+                            Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
     }
@@ -127,5 +139,9 @@ public class PictureViewModel implements ViewModel {
         if (subscription != null && !subscription.isUnsubscribed()) {
             subscription.unsubscribe();
         }
+    }
+
+    public interface DataListener {
+        void savePictureSuccess(String path,int type);
     }
 }
