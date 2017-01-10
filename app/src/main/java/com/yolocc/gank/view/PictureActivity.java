@@ -199,6 +199,7 @@ public class PictureActivity extends AppCompatActivity implements PictureViewMod
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        System.out.println("onActivityResult:" + requestCode + "resultCode:" + resultCode);
         if (requestCode == com.tencent.connect.common.Constants.REQUEST_QQ_SHARE) {
             Tencent.onActivityResultData(requestCode, resultCode, data, iUiListener);
         }
@@ -223,17 +224,17 @@ public class PictureActivity extends AppCompatActivity implements PictureViewMod
     IUiListener iUiListener = new IUiListener() {
         @Override
         public void onComplete(Object o) {
-
+            System.out.println("onComplete");
         }
 
         @Override
         public void onError(UiError uiError) {
-
+            System.out.println("onError");
         }
 
         @Override
         public void onCancel() {
-
+            System.out.println("onCancel");
         }
     };
 }
