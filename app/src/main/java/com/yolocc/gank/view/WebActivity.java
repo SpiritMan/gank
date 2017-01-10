@@ -5,6 +5,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -29,6 +30,7 @@ import com.tencent.tauth.UiError;
 import com.yolocc.gank.Constants;
 import com.yolocc.gank.R;
 import com.yolocc.gank.databinding.ActivityWebBinding;
+import com.yolocc.gank.utils.StatusBarCompat;
 
 public class WebActivity extends AppCompatActivity {
 
@@ -52,6 +54,7 @@ public class WebActivity extends AppCompatActivity {
         iwxapi = WXAPIFactory.createWXAPI(this, Constants.WECHAT_APP_ID, true);
         initWebView(activityWebBinding.webView, url);
         mTencent = Tencent.createInstance(Constants.QQ_APP_ID, this);
+        StatusBarCompat.compat(this, ContextCompat.getColor(this, R.color.colorPrimaryDark), true);
     }
 
     private void initToolbar(Toolbar toolbar) {
