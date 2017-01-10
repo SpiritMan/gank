@@ -17,7 +17,7 @@ http://gank.io/ 非官方Android客户端
 
 ![](image/gank_03.jpeg)![](image/gank_04.jpeg)
 
-### 感谢给位大神提供的参考
+### 感谢各位大神提供的参考
 - [drakeet/Meizhi](https://github.com/drakeet/Meizhi)
 - [LyndonChin/MasteringAndroidDataBinding](https://github.com/LyndonChin/MasteringAndroidDataBinding)
 - [所有API来自干货集中营](http://gank.io/api)
