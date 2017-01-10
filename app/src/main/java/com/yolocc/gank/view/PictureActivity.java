@@ -45,6 +45,7 @@ public class PictureActivity extends AppCompatActivity implements PictureViewMod
     private PhotoViewAttacher attacher;
     private IWXAPI iwxapi;
     private Tencent mTencent;
+    private PictureViewModel pictureViewModel;
     private int mExtarFlag = 0x00;
 
     @Override
@@ -53,7 +54,7 @@ public class PictureActivity extends AppCompatActivity implements PictureViewMod
         mActivityPictureBinding = DataBindingUtil.setContentView(this, R.layout.activity_picture);
         String desc = getIntent().getStringExtra(DESC);
         String imageUrl = getIntent().getStringExtra(IMAGE_URL);
-        PictureViewModel pictureViewModel = new PictureViewModel(this, this);
+        pictureViewModel = new PictureViewModel(this, this);
         pictureViewModel.mImageUrl = imageUrl;
         pictureViewModel.desc = desc;
         mActivityPictureBinding.setViewModel(pictureViewModel);
@@ -95,12 +96,12 @@ public class PictureActivity extends AppCompatActivity implements PictureViewMod
     }
 
     public void save(View view) {
-        mActivityPictureBinding.getViewModel().isShare = false;
+        pictureViewModel.isShare = false;
         //android 6.0后手动申请权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && PackageManager.PERMISSION_DENIED == checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
             requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST);
         } else {
-            mActivityPictureBinding.getViewModel().downloadImage();
+            pictureViewModel.downloadImage();
         }
     }
 
@@ -112,29 +113,29 @@ public class PictureActivity extends AppCompatActivity implements PictureViewMod
             public void onTargetChose(int target) {
                 switch (target) {
                     case ShareBottomDialogFragment.WECHAT_FRIEND_TARGET:
-                        shareWechat(mActivityPictureBinding.getViewModel().mImageUrl, 1);
+                        shareWechat(pictureViewModel.mImageUrl, 1);
                         break;
                     case ShareBottomDialogFragment.WECHAT_MOMENT_TARGET:
-                        shareWechat(mActivityPictureBinding.getViewModel().mImageUrl, 2);
+                        shareWechat(pictureViewModel.mImageUrl, 2);
                         break;
                     case ShareBottomDialogFragment.QQ_FRIEND_TARGET:
-                        mActivityPictureBinding.getViewModel().isShare = true;
-                        mActivityPictureBinding.getViewModel().type = 1;
+                        pictureViewModel.isShare = true;
+                        pictureViewModel.type = 1;
                         //android 6.0后手动申请权限
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && PackageManager.PERMISSION_DENIED == checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
                             requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST);
                         } else {
-                            mActivityPictureBinding.getViewModel().downloadImage();
+                            pictureViewModel.downloadImage();
                         }
                         break;
                     case ShareBottomDialogFragment.QQ_ZONE_TARGET:
-                        mActivityPictureBinding.getViewModel().isShare = true;
-                        mActivityPictureBinding.getViewModel().type = 2;
+                        pictureViewModel.isShare = true;
+                        pictureViewModel.type = 2;
                         //android 6.0后手动申请权限
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && PackageManager.PERMISSION_DENIED == checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
                             requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST);
                         } else {
-                            mActivityPictureBinding.getViewModel().downloadImage();
+                            pictureViewModel.downloadImage();
                         }
                         break;
                 }
@@ -193,7 +194,7 @@ public class PictureActivity extends AppCompatActivity implements PictureViewMod
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED && requestCode == STORAGE_PERMISSION_REQUEST) {
-            mActivityPictureBinding.getViewModel().downloadImage();
+            pictureViewModel.downloadImage();
         }
     }
 
@@ -212,7 +213,7 @@ public class PictureActivity extends AppCompatActivity implements PictureViewMod
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mActivityPictureBinding.getViewModel().destroy();
+        pictureViewModel.destroy();
         attacher.cleanup();
     }
 
